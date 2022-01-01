@@ -11,8 +11,12 @@ LOGS=$(wildcard *.txt)
 SRCS=$(wildcard *.c)
 DEPS=$(wildcard *.h)
 
-.PHONY: all clean run debug tar update send
+.PHONY: all clean run debug tar update send haskell
 all: ${BINS}
+
+haskell:
+	ghc Thing
+	ghc -o main.exe main.c Thing.o -no-hs-main
 
 %.exe: %.o
 	$(CXX) $(CXXFLAGS) $(LDD) $< -o $@

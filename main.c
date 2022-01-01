@@ -14,6 +14,8 @@
 
 #include <signal.h>
 
+#include "Thing_stub.h"
+
 char sample_response[] = \
 	"HTTP/1.1 200 OK\r\n"
 	"Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n"
@@ -78,6 +80,8 @@ main(int argc, char *argv[])
 	char buf[BUF_SIZ] = {0};
 	socklen_t clen = sizeof(client); 
 
+	hs_init(&argc, &argv);
+
 	signal( SIGKILL, exit_func );
 	signal( SIGTERM, exit_func );
 	signal( SIGINT,  exit_func );
@@ -115,12 +119,13 @@ main(int argc, char *argv[])
 			continue;
 		}
 		bzero(buf, BUF_SIZ);
-		read(client, buf, BUF_SIZ);
+		recv(client, buf, BUF_SIZ, 0);
 		printf("%s\n", buf);
 		fflush(stdout);
 		printf("Got 1\n");
 		clen = sizeof(client);
-		ret = write(client, sample_response, sizeof(sample_response) - 1);
+		strncpy(buf, canvasStr(), BUF_SIZ);
+		ret = send(client, buf, strlen(buf) - 1, 0);
 		printf("wrote: %d\n", ret);
 		fflush(stdout);
 		close(client);
