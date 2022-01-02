@@ -119,19 +119,44 @@ main(int argc, char *argv[])
 			continue;
 		}
 		bzero(buf, BUF_SIZ);
-		recv(client, buf, BUF_SIZ, 0);
+CRECV:
+		ret = recv(client, buf, BUF_SIZ, 0);
+		if (ret == -1) {
+			switch (errno) {
+				case EAGAIN:
+					break;
+				/*case EWOULDBLOCK:
+					break;*/
+				default:
+					fprintf(stderr, "recv: %d %s\n", strerror(errno));
+					goto CCLOSE;
+			}
+		}
 		printf("%s\n", buf);
 		fflush(stdout);
 		printf("Got 1\n");
 		clen = sizeof(client);
 		strncpy(buf, canvasStr(), BUF_SIZ);
+CSEND:
 		ret = send(client, buf, strlen(buf) - 1, 0);
+		if (ret == -1) {
+			switch (errno) {
+				case EAGAIN:
+					break;
+				/*case EWOULDBLOCK:
+					break;*/
+				default:
+					fprintf(stderr, "send: %d %s\n", strerror(errno));
+					goto CCLOSE;
+			}
+		}
 		printf("wrote: %d\n", ret);
 		fflush(stdout);
+CCLOSE:
 		close(client);
 	}
 
 	close(sock);
 
-	return (0);
+	return (EXIT_SUCCESS);
 }
