@@ -9,14 +9,15 @@ OUTS=$(wildcard testing/*.txt)
 
 LOGS=$(wildcard *.txt)
 SRCS=$(wildcard *.c)
+SRCS+=$(wildcard *.hs)
 DEPS=$(wildcard *.h)
 
 .PHONY: all clean run debug tar update send haskell
-all: ${BINS}
+all: haskell
 
-haskell:
-	ghc Thing
-	ghc -o main.exe main.c Thing.o -no-hs-main
+haskell: ${SRCS}
+	ghc -debug Thing
+	ghc -debug -o main.exe main.c Thing.o -no-hs-main
 
 %.exe: %.o
 	$(CXX) $(CXXFLAGS) $(LDD) $< -o $@
@@ -24,7 +25,7 @@ haskell:
 %.o: %.cpp ${DEPS}
 	$(CXX) $(CXXFLAGS) $(LDD) $< -c
 
-run: all
+run: haskell
 	for bin in ${BINS}; do ./$$bin; done
 
 debug: all

@@ -35,7 +35,8 @@ newtype Element = Element (Position, Duration, Content)
                 deriving (Show, Eq)
 
 
-newtype Canvas  = Canvas [Element]
+data Canvas     = One [Element]
+                | Many [Canvas] 
                 deriving (Show, Eq)
 
 canvasStr :: IO CString
@@ -44,7 +45,7 @@ canvasStr = (newCString . show) things
 foreign export ccall canvasStr :: IO CString
 
 toCanvas :: [String] -> Canvas
-toCanvas xs = Canvas (map (\s -> Element (Position (Height 0, Width 0), Done, Words s)) xs)
+toCanvas xs = One (map (\s -> Element (Position (Height 0, Width 0), Done, Words s)) xs)
 
 things :: Canvas
 things = toCanvas ["Hello", "This", "Is", "A", "Test"]

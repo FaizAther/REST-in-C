@@ -2,6 +2,7 @@
     "files.associations": {
         "in.h": "c",
         "cstdlib": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "hsffi.h": "c"
     }
 }
