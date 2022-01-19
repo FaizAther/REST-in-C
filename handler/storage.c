@@ -16,7 +16,15 @@ typedef struct _Storage {
 
 #include "storage.h"
 
-inline Storage
+// void
+// storage_destroy(Storage s)
+// {
+//     if (s->lock)
+//         return;
+//     for ()
+// }
+
+Storage
 storage_init(void)
 {
     Storage s = (Storage)malloc(sizeof(*s));
@@ -28,7 +36,7 @@ storage_init(void)
     return s;
 }
 
-inline bool
+bool
 storage_decrement(Storage bucket)
 {
     if (bucket->lock) {
@@ -39,7 +47,7 @@ storage_decrement(Storage bucket)
     return true;
 }
 
-inline bool
+bool
 storage_increment(Storage bucket)
 {
     if (bucket->lock) {
@@ -49,7 +57,7 @@ storage_increment(Storage bucket)
     return true;
 }
 
-inline Size
+Size
 storage_size(Storage bucket)
 {
     return bucket->length;
@@ -62,9 +70,15 @@ storage_add(Storage bucket, Item item)
         return false;
     }
 
-    return container_set_next(\
-        bucket->cursor, container_init(thing_init(item))) && \
-        storage_decrement(bucket);
+    if (bucket->length == 0) {
+        bucket->start = bucket->mid = \
+            container_init(thing_init(item));
+    } else {
+        container_set_next(\
+            bucket->cursor, container_init(thing_init(item)));
+    }
+
+    return storage_increment(bucket);
 }
 
 Container
@@ -93,13 +107,13 @@ storage_remove(Storage bucket, Pos index, bool on)
         container_free(find, on);
 }
 
-inline bool
+bool
 storage_islocked(Storage s)
 {
     return s->lock;
 }
 
-inline bool
+bool
 storage_lock(Storage s)
 {
     if (storage_islocked(s))
@@ -108,7 +122,7 @@ storage_lock(Storage s)
     return true;
 }
 
-inline bool
+bool
 storage_unlock(Storage s)
 {
     s->lock = false;

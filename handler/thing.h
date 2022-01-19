@@ -11,6 +11,12 @@ typedef void *Item;
 
 typedef struct _Thing *Thing;
 
+bool
+thing_is(Thing, Thing);
+
+Item
+thing_get(Thing);
+
 Thing
 thing_init(Item);
 

@@ -7,6 +7,21 @@ typedef struct _Thing {
     bool    lock;
 } _Thing;
 
+bool
+thing_is(Thing t0, Thing t1)
+{
+    return t0 != NULL && t1 != NULL && \
+        t0->data == t1->data;
+}
+
+Item
+thing_get(Thing t)
+{
+    if (t != NULL)
+        return t->data;
+    return NULL;
+}
+
 Thing
 thing_init(Item i)
 {

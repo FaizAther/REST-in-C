@@ -18,6 +18,9 @@ storage_init(void);
 bool
 storage_add(Storage, Item);
 
+Container
+storage_find(Storage bucket, Pos index);
+
 bool
 storage_remove(Storage, Pos, bool);
 

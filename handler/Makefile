@@ -8,7 +8,7 @@ BINS=check.exe
 SRCS=$(wildcard *.c)
 OBJS=$(patsubst %.c,%.o,${SRCS})
 
-.PHONY: all clean run
+.PHONY: all clean run debug
 
 all: ${OBJS} ${BINS}
 	@echo $<
@@ -23,6 +23,9 @@ all: ${OBJS} ${BINS}
 
 run: all
 	./${BINS}
+
+debug: all
+	gdb ./${BINS} -q
 
 clean:
 	rm -rf *.o *.exe
