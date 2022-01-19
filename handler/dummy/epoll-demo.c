@@ -1,34 +1,27 @@
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <unistd.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
-
 #include <errno.h>
+#include <signal.h>
 
+#include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <sys/epoll.h>
 
-#include <signal.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define MAX_EVENTS	10
 #define BUF_SIZ		50
-
-
-// Straight up copying from man epoll
 
 typedef struct msgg {
 	char buf[BUF_SIZ];
 	unsigned int pos;
 } msgg_t;
 
-int glob_sock;
+int glob_sock = ~0;
 
 void
 exit_func ( int signo )
@@ -150,8 +143,18 @@ main(void)
 						if (msggs[n].pos == 0) {
 							bzero(msggs[n].buf, BUF_SIZ);
 						}
-						msggs[n].pos += recv(events[n].data.fd, \
+						ret = recv(events[n].data.fd, \
 							msggs[n].buf + msggs[n].pos, BUF_SIZ - 1, MSG_DONTWAIT);
+						if (ret < 0) {
+							switch (errno) {
+								case EWOULDBLOCK:
+									continue;
+									break;
+								default:
+									goto remove_it;
+							}
+						}
+						msggs[n].pos += ret;
 						if (msggs[n].pos < BUF_SIZ - 1) {
 							continue;
 						} else {
@@ -163,8 +166,18 @@ main(void)
 								&ev);
 						break;
 					case EPOLLOUT:
-						msggs[n].pos += send(events[n].data.fd, \
+						ret = send(events[n].data.fd, \
 							msggs[n].buf + msggs[n].pos, BUF_SIZ - 1, MSG_DONTWAIT);
+						if (ret < 0) {
+							switch (errno) {
+								case EWOULDBLOCK:
+									continue;
+									break;
+								default:
+									goto remove_it;
+							}
+						}
+						msggs[n].pos += ret;
 						if (msggs[n].pos < BUF_SIZ - 1) {
 							continue;
 						} else {
@@ -178,6 +191,7 @@ main(void)
 					case EPOLLET:
 						break;
 					default:
+remove_it:
 						close(events[n].data.fd);
 						epoll_ctl(epollfd, EPOLL_CTL_DEL, events[n].data.fd, \
 							&events[n]);
@@ -187,11 +201,10 @@ main(void)
 	}
 
 	close(listen_sock);
-
-	return (0);
+	return (EXIT_SUCCESS);
 
 worse:
 	close(listen_sock);
 bad:
-	return -1;
+	return (EXIT_FAILURE);
 }
