@@ -12,12 +12,14 @@ SRCS=$(wildcard *.c)
 SRCS+=$(wildcard *.hs)
 DEPS=$(wildcard *.h)
 
+cc-options+=$(CXXFLAGS) $(LDD)
+
 .PHONY: all clean run debug tar update send haskell
 all: haskell
 
 haskell: ${SRCS}
-	ghc -debug Thing
-	ghc -debug -o main.exe main.c Thing.o -no-hs-main
+	ghc -debug -g3 -O Thing
+	ghc -debug -g3 -O -o main.exe main.c Thing.o -no-hs-main
 
 %.exe: %.o
 	$(CXX) $(CXXFLAGS) $(LDD) $< -o $@

@@ -120,13 +120,13 @@ main(int argc, char *argv[])
 
 	ret = bind(sock, (struct sockaddr *)&ssock, sizeof(ssock));
 	if (ret < 0) {
-		fprintf(stderr, "connect: %d %s\n", connect, strerror(errno));
+		fprintf(stderr, "connect: %d %s\n", ret, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
 	ret = listen(sock, 50);
 	if (ret < 0) {
-		fprintf(stderr, "listen: %d %s\n", connect, strerror(errno));
+		fprintf(stderr, "listen: %d %s\n", ret, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -149,11 +149,11 @@ CRECV:
 				/*case EWOULDBLOCK:
 					break;*/
 				default:
-					fprintf(stderr, "recv: %d %s\n", strerror(errno));
+					fprintf(stderr, "recv: %d %s\n", ret, strerror(errno));
 					goto CCLOSE;
 			}
 		}
-		printf("_____start{%zu}\n", count);
+		printf("_____start{%u}\n", count);
 		printf("%s\n", buf);
 		fflush(stdout);
 		clen = sizeof(client);
@@ -167,11 +167,11 @@ CSEND:
 				/*case EWOULDBLOCK:
 					break;*/
 				default:
-					fprintf(stderr, "send: %d %s\n", strerror(errno));
+					fprintf(stderr, "send: %d %s\n", ret, strerror(errno));
 					goto CCLOSE;
 			}
 		}
-		printf("_____end{%zu}__wroten{%d}\n", count, ret);
+		printf("_____end{%u}__wroten{%d}\n", count, ret);
 		fflush(stdout);
 CCLOSE:
 		close(client);
