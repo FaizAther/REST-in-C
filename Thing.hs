@@ -124,7 +124,10 @@ instance Jonify Canvas where
 -- foreign export ccall canvasStr :: IO CString
 
 toCanvas :: [String] -> Canvas
-toCanvas xs = One (map (\s -> Element (Position (Height 0, Width 0), Done, Words s)) [xs])
+toCanvas xs = One (map (\s -> Element (Position (Height 0, Width 0), Seconds 5, Words s)) [xs])
+
+manyCanvas :: [[String]] -> Canvas
+manyCanvas xs = Many $ map toCanvas xs
 
 things :: Canvas
-things = toCanvas ["Hello", "This", "Is", "A", "Test"]
+things = manyCanvas [["Hello", "This", "Is", "A", "Test"], ["Another test"]]
