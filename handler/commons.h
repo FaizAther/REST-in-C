@@ -6,5 +6,4 @@
 typedef unsigned int Pos;
 typedef unsigned int Size;
 
-
 #endif //COMMONS_H

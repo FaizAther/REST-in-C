@@ -3,7 +3,7 @@
 
 module Thing where
 
--- import Foreign.C ( CString, newCString )
+import Foreign.C ( CString, newCString )
 
 class Jonify a where
     jonify :: a -> String
@@ -118,10 +118,10 @@ instance Jonify Canvas where
     jonify (One es)     = jonifyNpStr "One" ++ jonifyIsStr es jonify ++ postJName
     jonify (Many es)    = jonifyNpStr "Many" ++ jonifyIsStr es jonify ++ postJName
 
--- canvasStr :: IO CString
--- canvasStr = (newCString . show) things
+canvasStr :: IO CString
+canvasStr = (newCString . jonify) things
 
--- foreign export ccall canvasStr :: IO CString
+foreign export ccall canvasStr :: IO CString
 
 toCanvas :: [String] -> Canvas
 toCanvas xs = One (map (\s -> Element (Position (Height 0, Width 0), Seconds 5, Words s)) [xs])

@@ -23,8 +23,12 @@ char sample_response[] = \
 	"Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\r\n" \
 	"Vary: Accept-Encoding\r\n" \
 /*	"Content-Type: application/vnd.api+json\r\n" \ */
+/*
 	"Content-Type: text/html; charset=UTF-8\r\n" \
+*/
+	"Content-Type: application/json\r\n" \
 	"\r\n"
+/*
 	"<!DOCTYPE html>" \
 	"<html lang=\"en\">" \
 	"<head>" \
@@ -42,7 +46,9 @@ char sample_response[] = \
 	"<input type=\"submit\" value=\"Submit\">" \
 	"</form>" \
 	"</body>" \
-	"</html>"; \
+	"</html>"
+*/
+	; \
 /*
 	"{"
 	"\"data\": [{"
@@ -159,7 +165,8 @@ CRECV:
 		clen = sizeof(client);
 		strncpy(buf, canvasStr(), BUF_SIZ);
 CSEND:
-		ret = send(client, sample_response, strlen(sample_response) - 1, 0);
+		ret = send(client, sample_response, sizeof(sample_response) - 1, 0);
+		ret = send(client, buf, strlen(buf), 0);
 		if (ret == -1) {
 			switch (errno) {
 				case EAGAIN:
