@@ -4,6 +4,7 @@ module JParser where
 -- https://www.youtube.com/watch?v=N9RUqGYuGfw
 
 import Control.Applicative ((<|>), Alternative, empty)
+import Data.Char (isDigit)
 
 data JonVal
   = JonNul
@@ -43,16 +44,34 @@ instance Alternative JParse where
   empty = JParser $ const Nothing
   (<|>) (JParser a0) (JParser a1) = JParser $ \input -> a0 input <|> a1 input
 
+-- null
+jonNul :: JParse JonVal
+jonNul = JonNul <$ parseStr "null"
+
 -- true, false
 jonBool :: JParse JonVal
 jonBool = f <$> (parseStr "true" <|> parseStr "false")
   where f "true" = JonBool True
         f "false" = JonBool False
-        f _ = undefined 
+        f _ = undefined
 
--- null
-jonNul :: JParse JonVal
-jonNul = JonNul <$ parseStr "null"
+span' :: (a -> Bool) -> [a] -> Maybe ([a], [a])
+span' f ls =
+  let (match, rest) = span f ls in
+    if null match then Nothing
+    else Just (rest, match)
+
+parseSpan :: (Char -> Bool) -> JParse String
+parseSpan f = JParser $ \input -> 
+                                span' f input
+
+-- 1 2 3
+jonNum :: JParse JonVal
+jonNum = f <$> parseSpan isDigit
+  where f xs = JonNum $ read xs
+
+jonStr :: JParse JonVal
+jonStr = JonStr <$> (parseCh '"' *> parseSpan (/= '"') <* parseCh '"')
 
 parseCh :: Char -> JParse Char
 parseCh ch = JParser singleCh
@@ -65,6 +84,5 @@ parseStr = traverse parseCh
   --   charPs :: [JParse Char]
   --   charPs = fmap parseCh str
 
-
-
--- parseStr = undefined 
+jonVal :: JParse JonVal
+jonVal = jonNul <|> jonBool <|> jonNum <|> jonStr
