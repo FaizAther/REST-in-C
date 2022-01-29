@@ -3,8 +3,8 @@ module JParser where
 -- Copying tsoding
 -- https://www.youtube.com/watch?v=N9RUqGYuGfw
 
-import Control.Applicative ((<|>), Alternative, empty)
-import Data.Char (isDigit)
+import Control.Applicative ((<|>), Alternative, empty, many)
+import Data.Char (isDigit, isSpace)
 
 data JonVal
   = JonNul
@@ -62,7 +62,7 @@ span' f ls =
     else Just (rest, match)
 
 parseSpan :: (Char -> Bool) -> JParse String
-parseSpan f = JParser $ \input -> 
+parseSpan f = JParser $ \input ->
                                 span' f input
 
 -- 1 2 3
@@ -70,8 +70,30 @@ jonNum :: JParse JonVal
 jonNum = f <$> parseSpan isDigit
   where f xs = JonNum $ read xs
 
+parseLiteral :: JParse String
+parseLiteral = parseCh '"' *> parseSpan (/= '"') <* parseCh '"'
+
 jonStr :: JParse JonVal
-jonStr = JonStr <$> (parseCh '"' *> parseSpan (/= '"') <* parseCh '"')
+jonStr = JonStr <$> parseLiteral
+
+parseWs :: JParse String
+parseWs = parseSpan isSpace
+
+jonList :: JParse JonVal
+jonList = JonList <$> (parseCh '[' *> elements <* parseCh ']')
+  where elements :: JParse [JonVal]
+        elements = (((:) <$> jonVal) <*> many elementM) <|> (:[]) <$> jonVal <|> pure []
+        elementM = sepOp *> jonVal
+        sepOp = parseCh ','
+
+jonMap :: JParse JonVal
+jonMap = JonMap <$> (parseCh '{' *> mappings <* parseCh '}')
+  where mappings :: JParse [(String, JonVal)]
+        mappings = (:) <$> mapping <*> many mappingM <|> (:[]) <$> mapping <|> pure []
+        mappingM :: JParse (String, JonVal)
+        mappingM = sepOp *> mapping
+        mapping = (,) <$> parseLiteral <*> (parseCh ':' *> jonVal)
+        sepOp = parseCh ','
 
 parseCh :: Char -> JParse Char
 parseCh ch = JParser singleCh
@@ -85,4 +107,4 @@ parseStr = traverse parseCh
   --   charPs = fmap parseCh str
 
 jonVal :: JParse JonVal
-jonVal = jonNul <|> jonBool <|> jonNum <|> jonStr
+jonVal = jonNul <|> jonBool <|> jonNum <|> jonStr <|> jonList <|> jonMap
