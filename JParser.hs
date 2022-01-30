@@ -9,7 +9,7 @@ import Data.Char (isDigit, isSpace)
 data JonVal
   = JonNul
   | JonBool Bool
-  | JonNum Integer
+  | JonNum Int
   | JonLit String
   | JonList [JonVal]
   | JonMap [(String, JonVal)]

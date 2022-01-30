@@ -5,7 +5,7 @@ module Thing where
 
 import JParser
   ( JParse (runJParser),
-    JonVal (JonList, JonLit, JonMap),
+    JonVal (JonList, JonLit, JonMap, JonNum),
     jonVal,
   )
 
@@ -162,6 +162,26 @@ data Duration
   | Hours Int
   | Days Int
   deriving (Show, Eq)
+
+validDuration :: String -> Maybe Duration
+validDuration input = do
+  (left, obj) <- runJParser jonVal input
+  case obj of
+    JonMap [("Duration", value)] ->
+      case value of
+        JonLit "Done" -> Just Done
+        _ -> Nothing
+    JonMap [("Seconds", JonNum n)] -> Just $ Seconds n
+    JonMap [("Minutes", JonNum n)] -> Just $ Seconds n
+    JonMap [("Hours", JonNum n)] -> Just $ Seconds n
+    JonMap [("Days", JonNum n)] -> Just $ Seconds n
+    _ -> Nothing
+
+testDur0 :: Maybe Duration
+testDur0 = validDuration "{\"Duration\":\"Done\"}"
+
+testDur1 :: Maybe Duration
+testDur1 = validDuration "{\"Seconds\":1}"
 
 nameJDn :: JonStr
 nameJDn = JonStr "Done"
