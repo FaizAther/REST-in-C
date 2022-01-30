@@ -5,15 +5,7 @@ module JParser where
 
 import Control.Applicative (Alternative, empty, many, (<|>))
 import Data.Char (isDigit, isSpace)
-
-data JonVal
-  = JonNul
-  | JonBool Bool
-  | JonNum Int
-  | JonLit String
-  | JonList [JonVal]
-  | JonMap [(String, JonVal)]
-  deriving (Show, Eq)
+import JonVal (JonVal (..))
 
 newtype JParse a = JParser
   { runJParser :: String -> Maybe (String, a)
