@@ -5,9 +5,9 @@ module Thing where
 
 import JParser
   ( JParse (runJParser),
-    JonVal (JonList, JonLit, JonMap, JonNum),
     jonVal,
   )
+import JonVal (JonVal (JonList, JonLit, JonMap, JonNum))
 
 -- import Foreign.C ( CString, newCString )
 
@@ -60,10 +60,10 @@ validUrl :: String -> Maybe Url
 validUrl input = do
   (leftover, obj) <- runJParser jonVal input
   case obj of
-    JonMap [(key, value)] ->
+    JonVal.JonMap [(key, value)] ->
       if key == "Url"
         then case value of
-          JonLit s -> Just (Url (JonStr s))
+          JonVal.JonLit s -> Just (Url (JonStr s))
           _ -> Nothing
         else Nothing
     _ -> Nothing
@@ -99,18 +99,18 @@ validContent :: String -> Maybe Content
 validContent input = do
   (left, obj) <- runJParser jonVal input
   case obj of
-    JonMap [("Content", value)] ->
+    JonVal.JonMap [("Content", value)] ->
       case value of
-        JonLit "Nil" -> Just Nil
+        JonVal.JonLit "Nil" -> Just Nil
         _ -> Nothing
-    JonMap [("Words", JonList js)] -> Just $ Words $ f js
-    JonMap [("Video", JonMap [("Url", JonLit link)])] -> Just $ Video $ Url $ JonStr link
-    JonMap [("Picture", JonMap [("Url", JonLit link)])] -> Just $ Picture $ Url $ JonStr link
-    JonMap [("Audio", JonMap [("Url", JonLit link)])] -> Just $ Audio $ Url $ JonStr link
+    JonVal.JonMap [("Words", JonVal.JonList js)] -> Just $ Words $ f js
+    JonVal.JonMap [("Video", JonVal.JonMap [("Url", JonVal.JonLit link)])] -> Just $ Video $ Url $ JonStr link
+    JonVal.JonMap [("Picture", JonVal.JonMap [("Url", JonVal.JonLit link)])] -> Just $ Picture $ Url $ JonStr link
+    JonVal.JonMap [("Audio", JonVal.JonMap [("Url", JonVal.JonLit link)])] -> Just $ Audio $ Url $ JonStr link
     _ -> Nothing
   where
-    f :: [JonVal] -> [JonStr]
-    f (JonLit s : js) = JonStr s : f js
+    f :: [JonVal.JonVal] -> [JonStr]
+    f (JonVal.JonLit s : js) = JonStr s : f js
     f (_ : js) = f js
     f _ = []
 
@@ -167,14 +167,14 @@ validDuration :: String -> Maybe Duration
 validDuration input = do
   (left, obj) <- runJParser jonVal input
   case obj of
-    JonMap [("Duration", value)] ->
+    JonVal.JonMap [("Duration", value)] ->
       case value of
-        JonLit "Done" -> Just Done
+        JonVal.JonLit "Done" -> Just Done
         _ -> Nothing
-    JonMap [("Seconds", JonNum n)] -> Just $ Seconds n
-    JonMap [("Minutes", JonNum n)] -> Just $ Seconds n
-    JonMap [("Hours", JonNum n)] -> Just $ Seconds n
-    JonMap [("Days", JonNum n)] -> Just $ Seconds n
+    JonVal.JonMap [("Seconds", JonVal.JonNum n)] -> Just $ Seconds n
+    JonVal.JonMap [("Minutes", JonVal.JonNum n)] -> Just $ Seconds n
+    JonVal.JonMap [("Hours", JonVal.JonNum n)] -> Just $ Seconds n
+    JonVal.JonMap [("Days", JonVal.JonNum n)] -> Just $ Seconds n
     _ -> Nothing
 
 testDur0 :: Maybe Duration
