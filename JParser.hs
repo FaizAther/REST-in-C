@@ -35,6 +35,7 @@ instance Applicative JParse where
     pure (valS', fab' a')
 
 instance Monad JParse where
+  --(>>=) :: JParse a -> (a -> JParse b) -> JParse b
   (>>=) (JParser fa) fjb = JParser $ \input -> do
     (valS, a') <- fa input
     (JParser fmb) <- Just $ fjb a'
