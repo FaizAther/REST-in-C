@@ -110,7 +110,7 @@ validContent input = do
     _ -> Nothing
   where
     f :: [JonVal] -> [JonStr]
-    f ((JonLit s) : js) = JonStr s : f js
+    f (JonLit s : js) = JonStr s : f js
     f (_ : js) = f js
     f _ = []
 

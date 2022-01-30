@@ -70,7 +70,7 @@ span'' f ls =
    in Just (rest, match)
 
 parseSpan_ ::
-  ((Char -> Bool) -> [Char] -> Maybe ([Char], [Char])) ->
+  ((Char -> Bool) -> String -> Maybe (String, String)) ->
   (Char -> Bool) ->
   JParse String
 parseSpan_ fx f = JParser $ \input ->
