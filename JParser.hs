@@ -64,9 +64,27 @@ span' f ls =
         then Nothing
         else Just (rest, match)
 
+span'' :: (a -> Bool) -> [a] -> Maybe ([a], [a])
+span'' f ls =
+  let (match, rest) = span f ls
+   in Just (rest, match)
+
+parseSpan_ ::
+  ((Char -> Bool) -> [Char] -> Maybe ([Char], [Char])) ->
+  (Char -> Bool) ->
+  JParse String
+parseSpan_ fx f = JParser $ \input ->
+  fx f input
+
 parseSpan :: (Char -> Bool) -> JParse String
-parseSpan f = JParser $ \input ->
-  span' f input
+parseSpan = parseSpan_ span'
+
+parseSpan' :: (Char -> Bool) -> JParse String
+parseSpan' = parseSpan_ span''
+
+-- parseSpan :: (Char -> Bool) -> JParse String
+-- parseSpan f = JParser $ \input ->
+--   span' f input
 
 -- 1 2 3
 jonNum :: JParse JonVal
@@ -81,25 +99,25 @@ jonStr :: JParse JonVal
 jonStr = JonStr <$> parseLiteral
 
 parseWs :: JParse String
-parseWs = parseSpan isSpace
+parseWs = parseSpan' isSpace
 
 jonList :: JParse JonVal
-jonList = JonList <$> (parseCh '[' *> elements <* parseCh ']')
+jonList = JonList <$> (parseCh '[' *> parseWs *> elements <* parseWs <* parseCh ']')
   where
     elements :: JParse [JonVal]
     elements = (((:) <$> jonVal) <*> many elementM) <|> (: []) <$> jonVal <|> pure []
-    elementM = sepOp *> jonVal
-    sepOp = parseCh ','
+    elementM = parseWs *> sepOp *> parseWs *> jonVal <* parseWs
+    sepOp = parseWs *> parseCh ',' <* parseWs
 
 jonMap :: JParse JonVal
-jonMap = JonMap <$> (parseCh '{' *> mappings <* parseCh '}')
+jonMap = JonMap <$> (parseCh '{' *> parseWs *> mappings <* parseWs <* parseCh '}')
   where
     mappings :: JParse [(String, JonVal)]
     mappings = (:) <$> mapping <*> many mappingM <|> (: []) <$> mapping <|> pure []
     mappingM :: JParse (String, JonVal)
-    mappingM = sepOp *> mapping
-    mapping = (,) <$> parseLiteral <*> (parseCh ':' *> jonVal)
-    sepOp = parseCh ','
+    mappingM = parseWs *> sepOp *> parseWs *> mapping <* parseWs
+    mapping = (,) <$> (parseWs *> parseLiteral <* parseWs) <*> (parseWs *> parseCh ':' *> parseWs *> jonVal <* parseWs)
+    sepOp = parseWs *> parseCh ',' <* parseWs
 
 parseCh :: Char -> JParse Char
 parseCh ch = JParser singleCh
