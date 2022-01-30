@@ -10,7 +10,7 @@ data JonVal
   = JonNul
   | JonBool Bool
   | JonNum Integer
-  | JonStr String
+  | JonLit String
   | JonList [JonVal]
   | JonMap [(String, JonVal)]
   deriving (Show, Eq)
@@ -95,8 +95,8 @@ jonNum = f <$> parseSpan isDigit
 parseLiteral :: JParse String
 parseLiteral = parseCh '"' *> parseSpan (/= '"') <* parseCh '"'
 
-jonStr :: JParse JonVal
-jonStr = JonStr <$> parseLiteral
+jonLit :: JParse JonVal
+jonLit = JonLit <$> parseLiteral
 
 parseWs :: JParse String
 parseWs = parseSpan' isSpace
@@ -109,15 +109,18 @@ jonList = JonList <$> (parseCh '[' *> parseWs *> elements <* parseWs <* parseCh 
     elementM = parseWs *> sepOp *> parseWs *> jonVal <* parseWs
     sepOp = parseWs *> parseCh ',' <* parseWs
 
-jonMap :: JParse JonVal
-jonMap = JonMap <$> (parseCh '{' *> parseWs *> mappings <* parseWs <* parseCh '}')
+jonMap_ :: JParse JonVal -> JParse JonVal
+jonMap_ valueP = JonMap <$> (parseCh '{' *> parseWs *> mappings <* parseWs <* parseCh '}')
   where
     mappings :: JParse [(String, JonVal)]
     mappings = (:) <$> mapping <*> many mappingM <|> (: []) <$> mapping <|> pure []
     mappingM :: JParse (String, JonVal)
     mappingM = parseWs *> sepOp *> parseWs *> mapping <* parseWs
-    mapping = (,) <$> (parseWs *> parseLiteral <* parseWs) <*> (parseWs *> parseCh ':' *> parseWs *> jonVal <* parseWs)
+    mapping = (,) <$> (parseWs *> parseLiteral <* parseWs) <*> (parseWs *> parseCh ':' *> parseWs *> valueP <* parseWs)
     sepOp = parseWs *> parseCh ',' <* parseWs
+
+jonMap :: JParse JonVal
+jonMap = jonMap_ jonVal
 
 parseCh :: Char -> JParse Char
 parseCh ch = JParser singleCh
@@ -133,4 +136,4 @@ parseStr = traverse parseCh
 --   charPs = fmap parseCh str
 
 jonVal :: JParse JonVal
-jonVal = jonNul <|> jonBool <|> jonNum <|> jonStr <|> jonList <|> jonMap
+jonVal = jonNul <|> jonBool <|> jonNum <|> jonLit <|> jonList <|> jonMap
