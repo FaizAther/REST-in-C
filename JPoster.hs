@@ -1,7 +1,7 @@
 -- {-# LANGUAGE FlexibleInstances #-}
 -- {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Thing where
+module JPoster where
 
 import JParser
   ( JParse (runJParser),
@@ -9,7 +9,7 @@ import JParser
   )
 import JonVal (JonVal (JonList, JonLit, JonMap, JonNum))
 
--- import Foreign.C ( CString, newCString )
+import Foreign.C ( CString, newCString )
 
 class Jonify a where
   jonify :: a -> JonStr
@@ -78,26 +78,26 @@ validUrl input = do
     _ -> Nothing
 
 jonifyIStr :: Jonify a => a -> JonStr
-jonifyIStr xs = preJItem Thing.++ jonify xs Thing.++ postJItem
+jonifyIStr xs = preJItem JPoster.++ jonify xs JPoster.++ postJItem
 
 jonifyIsStr :: Jonify a => [a] -> (a -> JonStr) -> JonStr
-jonifyIsStr xs f = preJList Thing.++ jonifyIsStrH xs Thing.++ postJList
+jonifyIsStr xs f = preJList JPoster.++ jonifyIsStrH xs JPoster.++ postJList
   where
     jonifyIsStrH [] = emptyJ
     jonifyIsStrH [x] = f x
-    jonifyIsStrH (x : xs) = f x Thing.++ commaJ Thing.++ jonifyIsStrH xs
+    jonifyIsStrH (x : xs) = f x JPoster.++ commaJ JPoster.++ jonifyIsStrH xs
 
 jonifyNpStr :: JonStr -> JonStr
-jonifyNpStr name = preJName Thing.++ name Thing.++ midJName
+jonifyNpStr name = preJName JPoster.++ name JPoster.++ midJName
 
 jonifyNpStr' :: JonStr -> JonStr
-jonifyNpStr' name = preJItem Thing.++ name Thing.++ midJName
+jonifyNpStr' name = preJItem JPoster.++ name JPoster.++ midJName
 
 nameJUrl :: JonStr
 nameJUrl = JonStr "Url"
 
 instance Jonify Url where
-  -- jonify (Url link) = jonifyNpStr nameJUrl Thing.++ jonifyIStr link Thing.++ postJName
+  -- jonify (Url link) = jonifyNpStr nameJUrl JPoster.++ jonifyIStr link JPoster.++ postJName
   jonify (Url link) = JonStr $ show $ JonMap [("Url", JonLit (unJonStr link))]
 
 data Content
@@ -146,15 +146,15 @@ nameJAud :: JonStr
 nameJAud = JonStr "Audio"
 
 instance Jonify Content where
-  -- jonify Nil = jonifyNpStr nameJContent Thing.++ jonifyIStr nameJNth Thing.++ postJName
+  -- jonify Nil = jonifyNpStr nameJContent JPoster.++ jonifyIStr nameJNth JPoster.++ postJName
   jonify Nil = JonStr $ show $ JonMap [("Content", JonLit "Nil")]
-  jonify (Words ws) = jonifyNpStr nameJWds Thing.++ jonifyIsStr ws jonifyIStr Thing.++ postJName
+  jonify (Words ws) = jonifyNpStr nameJWds JPoster.++ jonifyIsStr ws jonifyIStr JPoster.++ postJName
   -- jonify (Words ws) = JonStr $ show $ JonList (map (JonLit . unJonStr) ws)
-  jonify (Picture url) = jonifyNpStr nameJPic Thing.++ jonify url Thing.++ postJName
+  jonify (Picture url) = jonifyNpStr nameJPic JPoster.++ jonify url JPoster.++ postJName
   -- jonify (Picture url) = JonStr $ show $ JonMap [("Picture", JonLit $ show url)]
-  jonify (Video url) = jonifyNpStr nameJVid Thing.++ jonify url Thing.++ postJName
+  jonify (Video url) = jonifyNpStr nameJVid JPoster.++ jonify url JPoster.++ postJName
   -- jonify (Video url) = JonStr $ show $ JonMap [("Video", JonLit $ show url)]
-  jonify (Audio url) = jonifyNpStr nameJAud Thing.++ jonify url Thing.++ postJName
+  jonify (Audio url) = jonifyNpStr nameJAud JPoster.++ jonify url JPoster.++ postJName
   -- jonify (Audio url) = JonStr $ show $ JonMap [("Audio", JonLit $ show url)]
 
 testCon :: String -> Maybe Content
@@ -220,11 +220,11 @@ nameJDys :: JonStr
 nameJDys = JonStr "Days"
 
 instance Jonify Duration where
-  jonify Done = jonifyNpStr nameJDn Thing.++ nameJZ Thing.++ postJName
-  jonify (Seconds val) = jonifyNpStr nameJSec Thing.++ (JonStr . show) val Thing.++ postJName
-  jonify (Minutes val) = jonifyNpStr nameJSec Thing.++ (JonStr . show) val Thing.++ postJName
-  jonify (Hours val) = jonifyNpStr nameJHrs Thing.++ (JonStr . show) val Thing.++ postJName
-  jonify (Days val) = jonifyNpStr nameJDys Thing.++ (JonStr . show) val Thing.++ postJName
+  jonify Done = jonifyNpStr nameJDn JPoster.++ nameJZ JPoster.++ postJName
+  jonify (Seconds val) = jonifyNpStr nameJSec JPoster.++ (JonStr . show) val JPoster.++ postJName
+  jonify (Minutes val) = jonifyNpStr nameJSec JPoster.++ (JonStr . show) val JPoster.++ postJName
+  jonify (Hours val) = jonifyNpStr nameJHrs JPoster.++ (JonStr . show) val JPoster.++ postJName
+  jonify (Days val) = jonifyNpStr nameJDys JPoster.++ (JonStr . show) val JPoster.++ postJName
 
 newtype Height = Height Int
   deriving (Show, Eq)
@@ -233,8 +233,8 @@ nameJHeight :: JonStr
 nameJHeight = JonStr "Height"
 
 instance Jonify Height where
-  jonify (Height val) = --jonifyNpStr nameJHeight Thing.++
-    jonifyIStr nameJHeight Thing.++ colonJ Thing.++
+  jonify (Height val) = --jonifyNpStr nameJHeight JPoster.++
+    jonifyIStr nameJHeight JPoster.++ colonJ JPoster.++
     (JonStr . show) val
     --Thing.++ postJName
 
@@ -245,8 +245,8 @@ nameJWidth :: JonStr
 nameJWidth = JonStr "Width"
 
 instance Jonify Width where
-  jonify (Width val) = --jonifyNpStr nameJWidth Thing.++ 
-    jonifyIStr nameJWidth Thing.++ colonJ Thing.++
+  jonify (Width val) = --jonifyNpStr nameJWidth JPoster.++ 
+    jonifyIStr nameJWidth JPoster.++ colonJ JPoster.++
     (JonStr . show) val
     --Thing.++ postJName
 
@@ -258,12 +258,12 @@ nameJPos = JonStr "Position"
 
 instance Jonify Position where
   jonify (Position (h, w)) =
-    --jonifyNpStr nameJPos Thing.++ preJList Thing.++ 
-      jonifyIStr nameJPos Thing.++ midJName' Thing.++ preJName'
-      Thing.++ jonify h
-      Thing.++ commaJ
-      Thing.++ jonify w
-      Thing.++ postJName
+    --jonifyNpStr nameJPos JPoster.++ preJList JPoster.++ 
+      jonifyIStr nameJPos JPoster.++ midJName' JPoster.++ preJName'
+      JPoster.++ jonify h
+      JPoster.++ commaJ
+      JPoster.++ jonify w
+      JPoster.++ postJName
       --Thing.++ postJName
       --Thing.++ postJList
       --Thing.++ postJName
@@ -280,15 +280,15 @@ nameJElm = JonStr "Element"
 instance Jonify Element where
   jonify (Element (pos, dur, con)) =
     jonifyNpStr nameJElm --Thing.++ preJList
-      Thing.++ preJName'
-      Thing.++ jonify pos
-      Thing.++ commaJ
-      Thing.++ jonifyIStr (JonStr "Time") Thing.++ midJName' Thing.++ jonify dur
-      Thing.++ commaJ
-      Thing.++ jonifyIStr (JonStr "Content") Thing.++ midJName' Thing.++ jonify con
+      JPoster.++ preJName'
+      JPoster.++ jonify pos
+      JPoster.++ commaJ
+      JPoster.++ jonifyIStr (JonStr "Time") JPoster.++ midJName' JPoster.++ jonify dur
+      JPoster.++ commaJ
+      JPoster.++ jonifyIStr (JonStr "Content") JPoster.++ midJName' JPoster.++ jonify con
       --Thing.++ postJList
-      Thing.++ postJName
-      Thing.++ postJName
+      JPoster.++ postJName
+      JPoster.++ postJName
 
 data Canvas
   = One [Element]
@@ -302,13 +302,13 @@ nameJMny :: JonStr
 nameJMny = JonStr "Many"
 
 instance Jonify Canvas where
-  jonify (One es) = jonifyNpStr nameJOne Thing.++ jonifyIsStr es jonify Thing.++ postJName
-  jonify (Many es) = jonifyNpStr nameJMny Thing.++ jonifyIsStr es jonify Thing.++ postJName
+  jonify (One es) = jonifyNpStr nameJOne JPoster.++ jonifyIsStr es jonify JPoster.++ postJName
+  jonify (Many es) = jonifyNpStr nameJMny JPoster.++ jonifyIsStr es jonify JPoster.++ postJName
 
--- -- canvasStr :: IO CString
--- -- canvasStr = (newCString . jonify) things
+canvasStr :: IO CString
+canvasStr = (newCString . unJonStr . jonify) things1
 
--- -- foreign export ccall canvasStr :: IO CString
+foreign export ccall canvasStr :: IO CString
 
 toCanvas :: [JonStr] -> Canvas
 toCanvas xs = One (map (\s -> Element (Position (Height 0, Width 0), Seconds 5, Words s)) [xs])

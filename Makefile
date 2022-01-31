@@ -18,8 +18,8 @@ cc-options+=$(CXXFLAGS) $(LDD)
 all: haskell
 
 haskell: ${SRCS}
-	ghc -debug -g3 -O Thing
-	ghc -debug -g3 -O -o main.exe main.c Thing.o -no-hs-main
+	ghc -debug -g3 -O JPoster
+	ghc -debug -g3 -O -o main.exe main.c JPoster.o JParser.o JonVal.o -no-hs-main
 
 %.exe: %.o
 	$(CXX) $(CXXFLAGS) $(LDD) $< -o $@
@@ -55,4 +55,4 @@ send: tar
 	curl -F "file=@`date +%F.%H.%Z`_assn2.tar.gz" https://file.io
 	
 clean:
-	rm -rf ${BINS} *.o *_assn2.tar.gz outtesting submit
+	rm -rf ${BINS} *.hi *.o *_assn2.tar.gz outtesting submit

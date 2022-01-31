@@ -14,7 +14,7 @@
 
 #include <signal.h>
 
-#include "Thing_stub.h"
+#include "JPoster_stub.h"
 
 char sample_response[] = \
 	"HTTP/1.1 200 OK\r\n" \
