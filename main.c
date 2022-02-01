@@ -82,7 +82,7 @@ char sample_response[] = \
 */
 #define BUF_SIZ	1024 * 2
 
-#define PORTNUM	5000
+#define PORTNUM	5001
 
 int sock = ~0;
 
@@ -163,7 +163,8 @@ CRECV:
 		printf("%s\n", buf);
 		fflush(stdout);
 		clen = sizeof(client);
-		strncpy(buf, canvasStr(), BUF_SIZ);
+		char *haskellStr = canvasStr();
+		strncpy(buf, haskellStr, BUF_SIZ);
 CSEND:
 		ret = send(client, sample_response, sizeof(sample_response) - 1, 0);
 		ret = send(client, buf, strlen(buf), 0);
@@ -181,6 +182,7 @@ CSEND:
 		printf("_____end{%u}__wroten{%d}\n", count, ret);
 		fflush(stdout);
 CCLOSE:
+		free(haskellStr);
 		close(client);
 		count++;
 	}
