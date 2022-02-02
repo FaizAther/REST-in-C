@@ -9,7 +9,7 @@ import JParser
   )
 import JonVal (JonVal (JonList, JonLit, JonMap, JonNum))
 
-import Foreign.C ( CString, newCString )
+-- import Foreign.C ( CString, newCString )
 
 class Jonify a where
   jonify :: a -> JonStr
@@ -305,19 +305,22 @@ instance Jonify Canvas where
   jonify (One es) = jonifyNpStr nameJOne JPoster.++ jonifyIsStr es jonify JPoster.++ postJName
   jonify (Many es) = jonifyNpStr nameJMny JPoster.++ jonifyIsStr es jonify JPoster.++ postJName
 
-canvasStr :: IO CString
-canvasStr = (newCString . unJonStr . jonify) things1
+-- canvasStr :: IO CString
+-- canvasStr = (newCString . unJonStr . jonify) things1
 
-foreign export ccall canvasStr :: IO CString
+-- foreign export ccall canvasStr :: IO CString
 
-toCanvas :: [JonStr] -> Canvas
-toCanvas xs = One (map (\s -> Element (Position (Height 0, Width 0), Seconds 5, Words s)) [xs])
+toElem :: [JonStr] -> Element
+toElem s = Element (Position (Height 0, Width 0), Seconds 5, Words s)
+
+toCanvas :: [[JonStr]] -> Canvas
+toCanvas xs = One (map toElem xs)
 
 manyCanvas :: [[JonStr]] -> Canvas
-manyCanvas xs = Many $ map toCanvas xs
+manyCanvas xs = Many $ map toCanvas [xs]
 
 things1 :: Canvas
-things1 = toCanvas $ fmap JonStr ["Hello", "This", "Is", "A", "Test"]
+things1 = toCanvas $ (JonStr <$>) <$> [["Hello", "This", "Is", "A", "Test"], ["Another", "Test"]]
 
 things0 :: Canvas
 things0 = manyCanvas [fmap JonStr ["Hello", "This", "Is", "A", "Test"], fmap JonStr ["Another test"]]
