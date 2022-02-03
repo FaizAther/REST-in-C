@@ -36,6 +36,24 @@ function doModify(elem) {
               para.appendChild(node);
               what = para;
               break;
+            case "Url":
+              const paraU = document.createElement("p");
+              const anchor = document.createElement("a");
+              anchor.setAttribute('href', what[val]);
+              anchor.innerHTML = "a dummy Url";
+              paraU.appendChild(anchor);
+              what = paraU;
+              break;
+            case "Video":
+              const paraV = document.createElement("div");
+              const vidV = document.createElement("video");
+              vidV.src = what[val]["Url"];
+              vidV.autoplay = true;
+              vidV.controls = true;
+              vidV.muted = true;
+              paraV.appendChild(vidV);
+              what = paraV;
+              break;
             default:
               console.log("bad" + val);
           }
@@ -92,4 +110,4 @@ async function callback(response) {
   }
 }
 
-httpGetAsync("http://192.168.18.198/sample.json", callback);
+httpGetAsync("http://www.2022contrary.xyz/demo/assets/sample.json", callback);
