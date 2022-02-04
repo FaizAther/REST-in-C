@@ -10,6 +10,26 @@
           "Seconds": 5
         },
         "Content": {
+          "Opt": [
+            "Words",
+            "Picture",
+            "Video",
+            "Audio",
+            "Link"
+          ]
+        }
+      }
+    },
+    {
+      "Element": {
+        "Position": {
+          "Height": 0,
+          "Width": 0
+        },
+        "Time": {
+          "Seconds": 5
+        },
+        "Content": {
           "Words": [
             "Hello",
             "This",

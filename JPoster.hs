@@ -7,7 +7,7 @@ import JParser
   ( JParse (runJParser),
     jonVal,
   )
-import JonVal (JonVal (JonList, JonLit, JonMap, JonNum))
+import JonVal (JonVal (JonList, JonLit, JonMap, JonNum, JonNul))
 
 -- import Foreign.C ( CString, newCString )
 
@@ -98,6 +98,7 @@ data Content
   | Video Url
   | Audio Url
   | Link Url
+  | Opt
   deriving (Show, Eq)
 
 validContent :: String -> Maybe Content
@@ -138,17 +139,24 @@ nameJVid = "Video"
 nameJAud :: String
 nameJAud = "Audio"
 
+nameJLnk :: [Char]
+nameJLnk = "Link"
+
+availableContent :: [String]
+availableContent = [nameJWds, nameJPic, nameJVid, nameJAud, nameJLnk]
+
 instance Jonify Content where
   -- jonify Nil = jonifyNpStr nameJContent ++ jonifyIStr nameJNth ++ postJName
   jonify Nil = show $ JonMap [("Content", JonLit "Nil")]
   -- jonify (Words ws) = jonifyNpStr nameJWds ++ jonifyIsStr ws jonifyIStr ++ postJName
-  jonify (Words ws) = show $ JonMap $ [("Words", JonList (map JonLit ws))]
+  jonify (Words ws) = show $ JonMap [(nameJWds, JonList (map JonLit ws))]
   jonify (Picture url) = jonifyNpStr nameJPic ++ jonify url ++ postJName
   -- jonify (Picture url) = show $ JonMap [("Picture", JonLit $ show url)]
   jonify (Video url) = jonifyNpStr nameJVid ++ jonify url ++ postJName
   -- jonify (Video url) = show $ JonMap [("Video", JonLit $ show url)]
   jonify (Audio url) = jonifyNpStr nameJAud ++ jonify url ++ postJName
   jonify (Link url) = jonify url
+  jonify Opt = show $ JonMap [("Opt", JonList $ JonLit <$> availableContent)]
 
 -- jonify (Audio url) = show $ JonMap [("Audio", JonLit $ show url)]
 
@@ -318,8 +326,15 @@ appendCanvas :: Element -> Canvas -> Canvas
 appendCanvas elem (One es) = One (es ++ [elem])
 appendCanvas _ rest = rest
 
+prependCanvas :: Element -> Canvas -> Canvas
+prependCanvas elem (One es) = One (elem : es)
+prependCanvas _ rest = rest
+
+toElem :: Content -> Element
+toElem c =  Element (Position (Height 0, Width 0), Seconds 5, c)
+
 toElemW :: [String] -> Element
-toElemW s = Element (Position (Height 0, Width 0), Seconds 5, Words s)
+toElemW s = toElem (Words s)
 
 toCanvasW :: [[String]] -> Canvas
 toCanvasW xs = One (map toElemW xs)
@@ -327,8 +342,11 @@ toCanvasW xs = One (map toElemW xs)
 manyCanvas :: [[String]] -> Canvas
 manyCanvas xs = Many $ map toCanvasW [xs]
 
+things0 :: Element
+things0 = toElem Opt
+
 things1 :: Canvas
-things1 = toCanvasW [
+things1 = prependCanvas things0 $ toCanvasW [
     ["Hello", "This", "Is", "A", "Test1"], ["Good", "bye", "end", "of", "Test1"],
     ["Hello", "This", "Is", "A", "Test2"], ["Good", "bye", "end", "of", "Test2"]
   ]
@@ -339,5 +357,5 @@ things2 = appendCanvas (Element (Position (Height 0, Width 0), Seconds 5, Video 
 things3 :: Canvas
 things3 = appendCanvas (Element (Position (Height 0, Width 0), Seconds 5, Link (Url "assets/dummy.mp4"))) things2
 
-things0 :: Canvas
-things0 = manyCanvas [["Hello", "This", "Is", "A", "Test"], ["Another test"]]
+thingsM :: Canvas
+thingsM = manyCanvas [["Hello", "This", "Is", "A", "Test"], ["Another test"]]

@@ -54,6 +54,20 @@ function doModify(elem) {
               paraV.appendChild(vidV);
               what = paraV;
               break;
+            case "Opt":
+              const form0 = document.createElement("form");
+              const sel0 = document.createElement("select");
+              for (optN in what[val]) {
+                optE = document.createElement("option");
+                console.log(optN);
+                optE.value = what[val][optN];
+                optE.innerHTML = what[val][optN];
+                sel0.appendChild(optE);
+              }
+              form0.appendChild(sel0);
+              form0.appendChild(document.createElement("input"));
+              what = form0;
+              break
             default:
               console.log("bad" + val);
           }
@@ -110,4 +124,4 @@ async function callback(response) {
   }
 }
 
-httpGetAsync("http://www.2022contrary.xyz/demo/assets/sample.json", callback);
+httpGetAsync("http://192.168.18.198/assets/sample.json", callback);
