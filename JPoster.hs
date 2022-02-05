@@ -1,6 +1,3 @@
--- {-# LANGUAGE FlexibleInstances #-}
--- {-# LANGUAGE ForeignFunctionInterface #-}
-
 module JPoster where
 
 import JParser
@@ -8,8 +5,6 @@ import JParser
     jonVal,
   )
 import JonVal (JonVal (JonList, JonLit, JonMap, JonNum, JonNul))
-
--- import Foreign.C ( CString, newCString )
 
 class Jonify a where
   jonify :: a -> String
@@ -89,7 +84,6 @@ nameJUrl = "Url"
 
 instance Jonify Url where
   jonify (Url link) = jonifyNpStr nameJUrl ++ jonifyIStr' link ++ postJName
-  -- jonify = show 
 
 data Content
   = Nil
@@ -146,19 +140,13 @@ availableContent :: [String]
 availableContent = [nameJWds, nameJPic, nameJVid, nameJAud, nameJLnk]
 
 instance Jonify Content where
-  -- jonify Nil = jonifyNpStr nameJContent ++ jonifyIStr nameJNth ++ postJName
   jonify Nil = show $ JonMap [("Content", JonLit "Nil")]
-  -- jonify (Words ws) = jonifyNpStr nameJWds ++ jonifyIsStr ws jonifyIStr ++ postJName
   jonify (Words ws) = show $ JonMap [(nameJWds, JonList (map JonLit ws))]
   jonify (Picture url) = jonifyNpStr nameJPic ++ jonify url ++ postJName
-  -- jonify (Picture url) = show $ JonMap [("Picture", JonLit $ show url)]
   jonify (Video url) = jonifyNpStr nameJVid ++ jonify url ++ postJName
-  -- jonify (Video url) = show $ JonMap [("Video", JonLit $ show url)]
   jonify (Audio url) = jonifyNpStr nameJAud ++ jonify url ++ postJName
   jonify (Link url) = jonify url
   jonify Opt = show $ JonMap [("Opt", JonList $ JonLit <$> availableContent)]
-
--- jonify (Audio url) = show $ JonMap [("Audio", JonLit $ show url)]
 
 testCon :: String -> Maybe Content
 testCon xs =
@@ -237,11 +225,8 @@ nameJHeight = "Height"
 
 instance Jonify Height where
   jonify (Height val) =
-    --jonifyNpStr nameJHeight ++
     jonifyIStr' nameJHeight ++ colonJ
       ++ show val
-
---Thing.++ postJName
 
 newtype Width = Width Int
   deriving (Show, Eq)
@@ -251,11 +236,8 @@ nameJWidth = "Width"
 
 instance Jonify Width where
   jonify (Width val) =
-    --jonifyNpStr nameJWidth ++
     jonifyIStr' nameJWidth ++ colonJ
       ++ show val
-
---Thing.++ postJName
 
 newtype Position = Position (Height, Width)
   deriving (Show, Eq)
@@ -265,16 +247,11 @@ nameJPos = "Position"
 
 instance Jonify Position where
   jonify (Position (h, w)) =
-    --jonifyNpStr nameJPos ++ preJList ++
     jonifyIStr' nameJPos ++ midJName' ++ preJName'
       ++ jonify h
       ++ commaJ
       ++ jonify w
       ++ postJName
-
---Thing.++ postJName
---Thing.++ postJList
---Thing.++ postJName
 
 newtype Element = Element (Position, Duration, Content)
   deriving (Show, Eq)
@@ -287,7 +264,7 @@ nameJElm = "Element"
 
 instance Jonify Element where
   jonify (Element (pos, dur, con)) =
-    jonifyNpStr nameJElm --Thing.++ preJList
+    jonifyNpStr nameJElm
       ++ preJName'
       ++ jonify pos
       ++ commaJ
@@ -298,7 +275,6 @@ instance Jonify Element where
       ++ jonifyIStr' "Content"
       ++ midJName'
       ++ jonify con
-      --Thing.++ postJList
       ++ postJName
       ++ postJName
 
@@ -316,11 +292,6 @@ nameJMny = "Many"
 instance Jonify Canvas where
   jonify (One es) = jonifyNpStr nameJOne ++ jonifyIsStr es jonify ++ postJName
   jonify (Many es) = jonifyNpStr nameJMny ++ jonifyIsStr es jonify ++ postJName
-
--- canvasStr :: IO CString
--- canvasStr = (newCString . unString . jonify) things1
-
--- foreign export ccall canvasStr :: IO CString
 
 appendCanvas :: Element -> Canvas -> Canvas
 appendCanvas elem (One es) = One (es ++ [elem])

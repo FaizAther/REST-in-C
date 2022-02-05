@@ -18,8 +18,8 @@ cc-options+=$(CXXFLAGS) $(LDD)
 all: haskell
 
 haskell: ${SRCS}
-	ghc -debug -g3 -O JPoster
-	ghc -debug -g3 -O -o main.exe main.c JPoster.o JParser.o JonVal.o -no-hs-main
+	ghc -debug -g3 -O Communication
+	ghc -debug -g3 -O -o main.exe main.c Communication.o JPoster.o JParser.o JonVal.o -no-hs-main
 
 %.exe: %.o
 	$(CXX) $(CXXFLAGS) $(LDD) $< -o $@
