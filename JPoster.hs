@@ -63,7 +63,7 @@ validUrl input = do
 jonifyIStr :: Jonify a => a -> String
 jonifyIStr xs = preJItem ++ jonify xs ++ postJItem
 
-jonifyIStr' :: [Char] -> [Char]
+jonifyIStr' :: String -> String
 jonifyIStr' xs = preJItem ++ xs ++ postJItem
 
 jonifyIsStr :: Jonify a => [a] -> (a -> String) -> String
@@ -133,7 +133,7 @@ nameJVid = "Video"
 nameJAud :: String
 nameJAud = "Audio"
 
-nameJLnk :: [Char]
+nameJLnk :: String
 nameJLnk = "Link"
 
 availableContent :: [String]
